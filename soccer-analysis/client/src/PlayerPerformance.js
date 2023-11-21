@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Line } from 'react-chartjs-2';
 import Select from 'react-select';
+import './App.css'; // Make sure you import the CSS file
+
 
 import {
   Chart as ChartJS,
@@ -142,7 +144,13 @@ function PlayerPerformance() {
           },
         },
       };
-      
+      const customStyles = {
+        option: (provided, state) => ({
+            ...provided,
+            color:'black',
+            // backgroundColor: state.isSelected ? '#4d94ff' : '#004d40', // Adjust the background color as needed
+        }),
+    };
     
 
     return (
@@ -158,24 +166,28 @@ function PlayerPerformance() {
           options={countryOptions}
           onChange={selectedOption => setSelectedCountryA(selectedOption.value)}
           placeholder="Select Country A"
+          styles={customStyles}
         />
         <Select
           className="custom-select"
           options={countryOptions}
           onChange={selectedOption => setSelectedCountryB(selectedOption.value)}
           placeholder="Select Country B"
+          styles={customStyles}
         />
         <Select
           className="custom-select"
           options={competitionOptions}
           onChange={selectedOption => setSelectedCompetition(selectedOption.value)}
           placeholder="Select Competition"
+          styles={customStyles}
         />
         <Select
           className="custom-select"
           options={positionOptions}
           onChange={selectedOption => setSelectedPosition(selectedOption.value)}
           placeholder="Select Position"
+          styles={customStyles}
         />
             </div>
 
@@ -185,7 +197,9 @@ function PlayerPerformance() {
             {queryResults && (
                 <div>
                     <h2>Query Results:</h2>
+                    <div style={{ backgroundColor: 'white', padding: '1rem' }}>
                     <Line data={chartData} options={chartOptions} />
+                    </div>
                 </div>
             )}
             {/* Link back to TrendQueriesPage

@@ -1,8 +1,14 @@
 const express = require('express');
-// const express = require('express');
+const nodemailer = require('nodemailer');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+
 const app = express();
 const PORT = 3001;
 const db = require('./db');
+
+app.use(cors());
+app.use(bodyParser.json());
 
 app.get('/data', async (req, res, next) => {
     console.log("here")
@@ -359,6 +365,48 @@ try {
 app.get('/sample', (req, res) => {
     res.json({ message: 'Hello from Express!' });
 });
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail', // Replace with your email provider
+  auth: {
+    user: 'renukasm141@gmail.com', // Replace with your email address
+    pass: 'Qwerty@98' // Replace with your email password
+  }
+});
+
+// Verify connection configuration
+transporter.verify(function (error, success) {
+  if (error) {
+    console.log(error);
+  } else {
+    console.log("Server is ready to take our messages");
+  }
+});
+
+app.post('/send-email', (req, res) => {
+  const { name, email, message } = req.body;
+
+  const mailOptions = {
+    from: email,
+    to: 'renukasm141@gmail.com', // Replace with your email address
+    subject: `New Contact from ${name}`,
+    text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
+    // For HTML email content
+    // html: `<p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${message}</p>`
+  };
+
+  transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.error('Error sending email:', err);
+      res.status(500).send('Error sending email');
+    } else {
+      console.log('Email sent:', info.response);
+      res.status(200).send('Email sent successfully');
+    }
+  });
+});
+
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });

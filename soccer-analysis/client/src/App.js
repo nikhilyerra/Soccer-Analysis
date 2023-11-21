@@ -9,7 +9,10 @@ import PlayerPerformance from './PlayerPerformance';
 import ClubPerformance from './ClubPerformance';
 import MarketValuation from './MarketValuation';
 import PlayerDemographics from './PlayerDemographics';
+import ContactPage from './ContactPage';
 import axios from 'axios';
+import './App.css'; // Make sure you import the CSS file
+
 
 
 function App() {
@@ -18,6 +21,11 @@ function App() {
             <div className="container mt-5">
                 <header className="text-center mb-5">
                     <h1>Foot Game</h1>
+                    <nav className="nav justify-content-center">
+                        <Link to="/" className="nav-link">Home</Link>
+                        <Link to="/about" className="nav-link">About</Link>
+                        <Link to="/contact" className="nav-link">Contact</Link>
+                    </nav>
                 </header>
             <Routes>
                     <Route path="/" element={<HomePage />} />
@@ -28,6 +36,8 @@ function App() {
                     <Route path="/clubs-performance" element={<ClubPerformance />} />
                     <Route path="/player-market-value" element={<MarketValuation />} />
                     <Route path="/impact-of-demographics" element={<PlayerDemographics />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
                 </Routes>
             </div>
         </Router>
@@ -54,11 +64,10 @@ function HomePage() {
 
     
     return (
-        <div>
-            <section className="text-center">
+        <div className="home-page">
+            <section className="hero-section text-center">
                 <h2>Get Football Statistics</h2>
             </section>
-
             <section className="d-flex justify-content-center mt-4">
                 <div className="row">
                     {[
@@ -118,6 +127,18 @@ function HomePage() {
         </div>
     );
 }
+
+
+function AboutPage() {
+    return (
+        <div>
+            <h2>About Us</h2>
+            <p>This is a platform dedicated to football enthusiasts who want to explore statistics, player performance, and market valuations.</p>
+        </div>
+    );
+}
+
+
 
 
 export default App;

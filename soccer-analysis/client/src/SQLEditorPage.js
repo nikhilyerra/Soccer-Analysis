@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-sql';
 import 'ace-builds/src-noconflict/theme-monokai';
+import './App.css'; // Make sure you import the CSS file
+
 
 // Define your database structure
 const databaseStructure = {

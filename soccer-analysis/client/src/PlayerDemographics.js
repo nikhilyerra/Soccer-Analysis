@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Bar } from 'react-chartjs-2';
 import Select from 'react-select';
 import { Line } from 'react-chartjs-2';
+import './App.css'; // Make sure you import the CSS file
+
 
 import {
   Chart as ChartJS,
@@ -124,7 +126,15 @@ function PlayerDemographics() {
           },
         },
       };
-      
+    
+    const customStyles = {
+        option: (provided, state) => ({
+            ...provided,
+            color:'black',
+            // backgroundColor: state.isSelected ? '#4d94ff' : '#004d40', // Adjust the background color as needed
+        }),
+    };
+
 
     return (
         <div>
@@ -137,24 +147,32 @@ function PlayerDemographics() {
                     placeholder="Min Height (cm)"
                     value={minHeight}
                     onChange={(e) => setMinHeight(e.target.value)}
+                    style={{ color: 'black' }}
+                    
                 />
                 <input
                     type="number"
                     placeholder="Max Height (cm)"
                     value={maxHeight}
                     onChange={(e) => setMaxHeight(e.target.value)}
+                    style={{ color: 'black' }}
+                 
                 />
                 <input
                     type="number"
                     placeholder="Min Age"
                     value={minAge}
                     onChange={(e) => setMinAge(e.target.value)}
+                    style={{ color: 'black' }}
+                  
                 />
                 <input
                     type="number"
                     placeholder="Max Age"
                     value={maxAge}
                     onChange={(e) => setMaxAge(e.target.value)}
+                    style={{ color: 'black' }}
+                 
                 />
             </div>
             
@@ -164,22 +182,24 @@ function PlayerDemographics() {
                 onChange={selectedOption => setSelectedFoot(selectedOption ? selectedOption.value : '')}
                 placeholder="Select Foot Preference"
                 isClearable
+                styles={customStyles}
             />
             <Select
                 options={positionOptions}
                 onChange={selectedOption => setSelectedPosition(selectedOption ? selectedOption.value : '')}
                 placeholder="Select Position"
                 isClearable
+                styles={customStyles}
             />
             <Select
                 options={clubs}
                 onChange={selectedOption => setSelectedClub(selectedOption ? selectedOption.value : '')}
                 placeholder="Select Club"
                 isClearable
+                styles={customStyles}
             />
 
-            {/* Button to run the query */}
-            <button onClick={handleRunQuery}>
+            <button className="btn btn-success" onClick={handleRunQuery} style={{ marginBottom: '10px' }}>
                 Run
             </button>
             
@@ -187,7 +207,9 @@ function PlayerDemographics() {
             {queryResults && (
                 <div>
                     <h2>Query Results:</h2>
+                    <div style={{ backgroundColor: 'white', padding: '1rem' }}>
                     <Line data={chartData} options={chartOptions} />
+                    </div>
                 </div>
             )}
         </div>

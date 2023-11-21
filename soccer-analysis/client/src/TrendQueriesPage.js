@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import './App.css'; // Make sure you import the CSS file
+
 
 function TrendQueriesPage() {
     const navigate = useNavigate();

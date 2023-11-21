@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Line } from 'react-chartjs-2';
 import Select from 'react-select';
+import './App.css'; // Make sure you import the CSS file
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -112,6 +114,13 @@ function MarketValuation() {
         },
       };
 
+      const customStyles = {
+        option: (provided, state) => ({
+            ...provided,
+            color:'black',
+            // backgroundColor: state.isSelected ? '#4d94ff' : '#004d40', // Adjust the background color as needed
+        }),
+    };
 
     return (
         <div>
@@ -123,6 +132,7 @@ function MarketValuation() {
                     options={playerOptions}
                     onChange={selectedOption => setSelectedPlayer(selectedOption.value  )}
                     placeholder="Select Player"
+                    styles={customStyles}
                 />
             </div>
 
@@ -133,7 +143,9 @@ function MarketValuation() {
             {queryResults && (
                 <div>
                     <h2>Query Results:</h2>
+                    <div style={{ backgroundColor: 'white', padding: '1rem' }}>
                     <Line data={chartData} options={chartOptions} />
+                    </div>
                 </div>
             )}
         </div>

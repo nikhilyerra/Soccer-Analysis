@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Line } from 'react-chartjs-2';
 import Select from 'react-select';
+import './App.css'; // Make sure you import the CSS file
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -116,7 +118,13 @@ function ClubPerformance() {
           },
         },
       };
-    
+      const customStyles = {
+        option: (provided, state) => ({
+            ...provided,
+            color:'black',
+            // backgroundColor: state.isSelected ? '#4d94ff' : '#004d40', // Adjust the background color as needed
+        }),
+    };
     return (
         <div>
             <h2>Club Performance</h2>
@@ -127,12 +135,14 @@ function ClubPerformance() {
                     options={clubOptions}
                     onChange={selectedOption => setSelectedClub(selectedOption ? selectedOption.value : null)}
                     placeholder="Select Club"
+                    styles={customStyles}
                 />
                 <Select
                     className="custom-select"
                     options={competitionOptions}
                     onChange={selectedOption => setSelectedCompetition(selectedOption ? selectedOption.value : null)}
                     placeholder="Select Competition"
+                    styles={customStyles}
                 />
                 <input
                     type="number"
@@ -142,6 +152,7 @@ function ClubPerformance() {
                     className="custom-select"
                     min="1"
                     max="90"
+                    style={{ color: 'black' }}
                 />
             </div>
 
@@ -152,7 +163,9 @@ function ClubPerformance() {
             {queryResults && (
                 <div>
                     <h2>Query Results:</h2>
+                    <div style={{ backgroundColor: 'white', padding: '1rem' }}>
                     <Line data={chartData} options={chartOptions} />
+                    </div>
                 </div>
             )}
         </div>
