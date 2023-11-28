@@ -1,11 +1,4 @@
-/* Existing styles... */
 
-/* New styles for soccer club theme */
-
-/* Style for the hero section */
-
-
-/* Reset default margins and paddings */
 * {
   margin: 0;
   padding: 0;
@@ -34,13 +27,9 @@ html, body {
   flex: 1; /* This allows the container to expand */
 }
 
-/* Other styles... */
-
-
 .hero-section {
-  /* background: url('./images/cool-soccer.jpg') no-repeat center center; */
   background-size: cover;
-  padding: 4em 0;
+  padding: 2em 0 6em; /* Reduced top padding and increased bottom padding */
   color: white;
 }
 
@@ -72,13 +61,6 @@ nav.nav .nav-link:hover {
   font-size: 1.2em;
 }
 
-/* .home-page {
-  background: url('./images/back4.jpg') no-repeat center center;
-  background-size: cover;
-  min-height: 100vh; 
-  color: white;
-} */
-
 /* Additional styles for cards */
 .home-page .col-md-4 {
   display: flex;
@@ -97,23 +79,16 @@ nav.nav .nav-link:hover {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Ensure that you have appropriate images and adjust the paths in the CSS accordingly */
-
 /* Set the default text color for the whole website */
 body, button, input, textarea, h1, h2, h3, h4, h5, h6, p, a, .nav-link {
   color: white; /* This will set the text color to white */
 }
 
-/* You may also want to ensure that links are visible */
 a, .nav-link {
   text-decoration: none; /* Optional: Removes underline from links */
   color: white; /* Ensures that all links are also white */
 }
 
-/* In case some elements need specific color overrides, you can define them explicitly */
-/* .special-color {
-  color: #SOME_OTHER_COLOR; 
-} */
 
 /* Ensure that form placeholders are visible */
 ::placeholder {
@@ -122,4 +97,189 @@ a, .nav-link {
 
 input::placeholder {
   color: grey; /* This will change the placeholder text color to grey */
+}
+
+.custom-select {
+  width: 30%; 
+}
+
+/* Adjust the .row styling to stack elements vertically */
+.button-container .row {
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Center buttons horizontally */
+}
+
+/* Update button styles to have a full width for smaller screens */
+.button-container .btn-block {
+  width: 30%; /* Full width */
+  margin-bottom: 1em; /* Add space between buttons */
+  
+}
+
+.header-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo {
+  height: 70px; 
+  width: auto; 
+  margin-right: 15px; 
+}
+
+
+/* You may also want to ensure the AboutPage container has a padding to prevent text touching the edges */
+.about-page {
+  padding: 2em;
+}
+
+.about-section-background {
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+  padding: 2em; /* Add some padding */
+  border-radius: 10px; /* Optional: rounded corners */
+  margin: 1em 0; /* Add some vertical space before and after the section */
+}
+
+
+/* Card styles */
+.home-page .col-md-4 {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem; /* Adjust space between cards if necessary */
+}
+
+/* Style for the cards, using a gradient background */
+.home-page .btn-primary {
+  background: linear-gradient(160deg, #003366 0%, #004d40 100%); /* Dark blue to dark green gradient */
+  color: #ffffff; /* White text */
+  border: none; /* Removes the border */
+  border-radius: 10px; /* Rounded corners */
+  padding: 1em;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for hover effects */
+}
+
+.home-page .btn-primary:hover {
+  transform: translateY(-5px); /* Slight raise effect on hover */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4); /* Increased shadow on hover for more depth */
+}
+
+/* You may need to adjust the image-size class if the images are too large/small */
+.image-size {
+  width: 100px; /* Adjust width as needed */
+  height: auto; /* Keep height proportional */
+  margin-bottom: 1rem; /* Space between the image and the text */
+}
+
+.btn-info {
+  background-color: #007bff; /* Choose a color that matches your theme */
+  color: white; /* Text color */
+  padding: 10px 20px; /* Top/bottom padding and left/right padding */
+  font-size: 1em; /* Adjust the font size as needed */
+  border: 2px solid transparent; /* Adds a border that can change color on hover */
+  border-radius: 25px; /* Fully rounded edges */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  transition: all 0.3s ease; /* Smooth transition for hover effects */
+}
+
+.btn-info:hover, .btn-info:focus {
+  background-color: #0056b3; /* Darker shade on hover/focus */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Larger shadow on hover/focus */
+  transform: translateY(-2px); /* Slightly raise the button when hovered/focused */
+}
+
+.rounded-table {
+  border-collapse: separate; /* Required for border-radius to take effect on tables */
+  border-spacing: 0;
+  border-radius: 9px; /* Adjust this value to increase or decrease the roundness */
+  overflow: hidden; /* Ensures the inner content doesn't overflow the rounded corners */
+}
+
+
+
+/* Adjusted button styles to be less rounded and have a pleasing color */
+.button-container .btn-info {
+  background: linear-gradient(160deg, #005577 0%, #006d55 100%); /* Adjusted gradient for buttons */
+  color: #ffffff; /* White text color for better contrast and readability */
+  padding: 12px 24px; /* Slightly more padding for a balanced look */
+  font-size: 1rem; /* Standard font size */
+  border: none; /* No border for a cleaner look */
+  border-radius: 8px; /* Less rounded corners compared to the 25px used before */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  transition: all 0.3s ease; /* Smooth transition for hover effects */
+}
+
+.button-container .btn-info:hover, .button-container .btn-info:focus {
+  background: linear-gradient(160deg, #004455 0%, #005d45 100%); /* Darker gradient on hover/focus */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Slightly larger shadow on hover/focus */
+  transform: translateY(-2px); /* Small raise effect on hover/focus */
+}
+
+
+/* TreeView Styling */
+.tree-view-container {
+  background-color: #022403; /* Dark green color matching the field */
+  color: #e7f4e4; /* Light green color for text for readability */
+  padding: 10px;
+}
+
+/* TreeItem node styles */
+.tree-view-container .MuiTreeItem-root {
+  margin: 5px 0;
+  padding: 4px 8px;
+  border-left: 2px solid #0a4f0a; /* Darker green for border */
+}
+
+/* TreeItem label styles */
+.tree-view-container .MuiTreeItem-label {
+  font-weight: 500;
+  color: #d7ebda; /* Slightly darker text for contrast */
+}
+
+/* TreeItem on hover */
+.tree-view-container .MuiTreeItem-root:hover {
+  background-color: #034d03; /* Slightly lighter green on hover */
+  border-left-color: #0c9f0c; /* Bright green for border */
+}
+
+/* TreeItem selected and focused styles */
+.tree-view-container .Mui-selected, 
+.tree-view-container .Mui-focused {
+  background-color: #026402; /* Green that stands out for selected/focus */
+  border-left-color: #1db31d; /* Bright green for border */
+}
+
+/* Adjust the scrollbar to match the theme */
+.tree-view-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.tree-view-container::-webkit-scrollbar-thumb {
+  background-color: #0a4f0a; /* Dark green scrollbar thumb */
+  border-radius: 10px;
+}
+
+.tree-view-container::-webkit-scrollbar-track {
+  background-color: #022403; /* Scrollbar track matches the container bg */
+}
+
+/* Ensure the box-sizing is border-box for all elements */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Additional padding and margin adjustments if necessary */
+.tree-view-container .MuiTreeItem-content {
+  padding-left: 10px; /* Align text better within the tree structure */
+}
+
+.tree-view-container .MuiTreeItem-group {
+  margin-left: 15px; /* Indent child nodes for clarity */
+}
+
+/* If icons are used, they should also match the color theme */
+.tree-view-container .MuiTreeItem-iconContainer .MuiSvgIcon-root {
+  color: #d7ebda; /* Light green color for icons */
 }

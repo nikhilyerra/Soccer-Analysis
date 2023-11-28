@@ -1,6 +1,7 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
+
 const cors = require('cors');
 
 const app = express();
@@ -9,6 +10,7 @@ const db = require('./db');
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(bodyParser.text());
 
 app.get('/data', async (req, res, next) => {
     console.log("here")
@@ -362,15 +364,80 @@ try {
 }
 });
 
+app.get('/query4', async (req, res, next) => {
+  console.log("here")
+try {
+  const max_red_cards = req.query.max_red_cards;
+  const max_yellow_cards = req.query.max_yellow_cards;
+  const min_minutes_played= req.query.min_minutes_played;
+  const player_id= req.query.player_id;
+  let query = `
+              SELECT 
+                g.season,
+                (COUNT(CASE WHEN g.home_club_id = a.player_club_id AND cg.is_win = 1 THEN 1 END) / 
+                  NULLIF(COUNT(CASE WHEN g.home_club_id = a.player_club_id THEN 1 END), 0)) * 100 AS home_win_percentage,
+                (COUNT(CASE WHEN g.away_club_id = a.player_club_id AND cg.is_win = 1 THEN 1 END) / 
+                  NULLIF(COUNT(CASE WHEN g.away_club_id = a.player_club_id THEN 1 END), 0)) * 100 AS away_win_percentage
+              FROM 
+                appearances a
+              INNER JOIN 
+                games g ON a.game_id = g.game_id
+              INNER JOIN 
+                club_games cg ON g.game_id = cg.game_id
+              WHERE 
+                a.player_id = :player_id AND 
+                (a.player_club_id = g.home_club_id OR a.player_club_id = g.away_club_id) AND
+                a.minutes_played > :min_minutes_played AND 
+                a.red_cards <= :max_red_cards AND 
+                a.yellow_cards <= :max_yellow_cards
+              GROUP BY 
+                g.season
+              ORDER BY 
+                g.season ASC
+            `;
+              
+  let binds = {max_red_cards,max_yellow_cards,min_minutes_played,player_id};
+  let result = await db.execute(query, binds);
+  console.log(result);
+  if (result && result.rows) {
+    res.json(result.rows);
+  } else {
+    res.status(500).json({ error: 'Unexpected database response.' });
+  }
+} catch (err) {
+  next(err);
+}
+});
+
+app.post('/editor-query', async (req, res, next) => {
+  console.log("here")
+try {
+  let text = req.body;
+  const lastIndex = text.lastIndexOf(';');
+  if (lastIndex !== -1) {
+    text = text.substring(0, lastIndex) + ' ' + text.substring(lastIndex + 1);
+  }
+  let result = await db.execute(text);
+  // console.log(result);
+  if (result && result.rows) {
+    res.json(result.rows);
+  } else {
+    res.status(500).json({ error: 'Unexpected database response.' });
+  }
+} catch (err) {
+  next(err);
+}
+});
+
 app.get('/sample', (req, res) => {
     res.json({ message: 'Hello from Express!' });
 });
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // Replace with your email provider
+  service: 'gmail', 
   auth: {
-    user: 'renukasm141@gmail.com', // Replace with your email address
-    pass: 'Qwerty@98' // Replace with your email password
+    user: 'renukasm141@gmail.com', 
+    pass: 'Qwerty@98'
   }
 });
 
@@ -388,11 +455,9 @@ app.post('/send-email', (req, res) => {
 
   const mailOptions = {
     from: email,
-    to: 'renukasm141@gmail.com', // Replace with your email address
+    to: 'renukasm141@gmail.com', 
     subject: `New Contact from ${name}`,
     text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
-    // For HTML email content
-    // html: `<p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${message}</p>`
   };
 
   transporter.sendMail(mailOptions, (err, info) => {

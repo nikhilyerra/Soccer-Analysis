@@ -150,6 +150,10 @@ function PlayerPerformance() {
             color:'black',
             // backgroundColor: state.isSelected ? '#4d94ff' : '#004d40', // Adjust the background color as needed
         }),
+        container: (provided) => ({
+          ...provided,
+          marginBottom: '10px', // Add 10px bottom margin to each Select component
+        }),
     };
     
 

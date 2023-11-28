@@ -10,8 +10,11 @@ import ClubPerformance from './ClubPerformance';
 import MarketValuation from './MarketValuation';
 import PlayerDemographics from './PlayerDemographics';
 import ContactPage from './ContactPage';
+import HomeAwayPerformance from './HomeAwayPerformance';
 import axios from 'axios';
-import './App.css'; // Make sure you import the CSS file
+import './App.css'; 
+import logo from './images/logo.png'; 
+
 
 
 
@@ -20,7 +23,10 @@ function App() {
         <Router>
             <div className="container mt-5">
                 <header className="text-center mb-5">
-                    <h1>Foot Game</h1>
+                <div className="header-content d-flex align-items-center justify-content-center"> 
+                        <img src={logo} alt="Logo" className="logo mr-3" /> 
+                        <h1>Foot Game</h1>
+                    </div>
                     <nav className="nav justify-content-center">
                         <Link to="/" className="nav-link">Home</Link>
                         <Link to="/about" className="nav-link">About</Link>
@@ -38,6 +44,7 @@ function App() {
                     <Route path="/impact-of-demographics" element={<PlayerDemographics />} />
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/home-away-performance" element={<HomeAwayPerformance />} />
                 </Routes>
             </div>
         </Router>
@@ -52,7 +59,6 @@ function HomePage() {
     const fetchTuples = () => {
         axios.get('/tuples')
             .then(response => {
-                // Assuming the response data format is correct
                 setTuples(response.data);
             })
             .catch(error => {
@@ -85,14 +91,18 @@ function HomePage() {
                 </div>
                 
             </section>
-            <button className="btn btn-info" onClick={fetchTuples} disabled={loading}>
-        {loading ? 'Loading...' : 'Load Database Information'}
-      </button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginRight: '1em' }}>
+    <button className="btn btn-primary" onClick={fetchTuples} disabled={loading}>
+      {loading ? 'Loading...' : 'Load Database Information'}
+    </button>
+  </div>
+
 
       {tuples.length > 0 && (
         <div>
           <h2>Database Table Information:</h2>
-          <table className="table">
+          <div >
+          <table className="table rounded-table">
             <thead>
               <tr>
                 <th>Table Name</th>
@@ -115,6 +125,7 @@ function HomePage() {
                         </tfoot>
           </table>
         </div>
+        </div>
       )}
 
             <style jsx>{`
@@ -131,12 +142,39 @@ function HomePage() {
 
 function AboutPage() {
     return (
-        <div>
-            <h2>About Us</h2>
-            <p>This is a platform dedicated to football enthusiasts who want to explore statistics, player performance, and market valuations.</p>
+        <div className="about-section-background">
+            <h2>About Our Soccer Data Analysis Project</h2>
+            <p>Welcome to our soccer data analysis platform, a cutting-edge digital destination for soccer enthusiasts, analysts, and professionals. Our project stands at the forefront of soccer data analytics, offering an unparalleled depth of information and insights into the beautiful game.</p>
+
+            <h4>Unrivaled Data Repository</h4>
+            <p>Our expansive database is a treasure trove of soccer statistics, encompassing over 60,000 matches across various seasons and prestigious competitions. We meticulously curate data from more than 400 soccer clubs worldwide, featuring detailed profiles of over 30,000 players. This rich dataset forms the backbone of our analysis, providing a comprehensive view of the soccer landscape.</p>
+
+            <h4>Our Mission</h4>
+            <p>Our primary goal is to unlock the stories hidden within these numbers. By analyzing this wealth of data, we aim to uncover valuable insights into player performances, team strategies, market dynamics, and historical match outcomes. We believe that our analytical approach can offer a fresh perspective on soccer, revealing patterns and trends that can transform our understanding of the game.</p>
+
+            <h4>Innovative Analysis Tools</h4>
+            <p>Our website is designed to be a hub for soccer trend analysis. We offer a range of analytical tools and features, including:</p>
+            <ul>
+                <li><strong>Trend Analysis:</strong> Visual representations and in-depth analysis of soccer games, enabling users to discern emerging trends and patterns.</li>
+                <li><strong>General Statistics:</strong> A comprehensive collection of statistics, offering a snapshot of various aspects of soccer from a global perspective.</li>
+                <li><strong>SQL Editor:</strong> For the more technically inclined, our SQL editor allows direct queries into our database, providing a flexible and powerful way to explore the data.</li>
+            </ul>
+            
+            <p>Whether you are a soccer analyst looking to delve into player performance metrics, a club official exploring strategic insights, or a fan keen on understanding the nuances of your favorite team, our platform caters to all.</p>
+            <p>Join us on this journey as we explore the world of soccer through the lens of data. Discover, analyze, and appreciate the beautiful game in ways you never thought possible.</p>
+            <h4>Developed by</h4>
+            <p>This project was brought to life by a dedicated team of enthusiasts of soccer data analysis:</p>
+            <ul>
+                <li>Ujwala Guttikonda</li>
+                <li>Nikhil Yerra</li>
+                <li>Arun Teja Unnagiri</li>
+                <li>Praveen Kumar Dande</li>
+            </ul>
+            <p>Guided by: Prof. Markus Schneider</p>
         </div>
     );
 }
+
 
 
 

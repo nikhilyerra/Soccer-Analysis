@@ -7,7 +7,7 @@ export default function ContactPage() {
   function sendEmail(e) {
     e.preventDefault();    //This is important, i'm not sure why, but the email won't send without it
 
-    emailjs.sendForm('service_01tx5zz', 'template_hphnat6', e.target, '954tv2wHW8Zx9TVOk')
+    emailjs.sendForm('service_01tx5zz', 'template_hphnat6', e.target, 'P2fYZ6JxB9XKPylYH')
       .then((result) => {
           window.location.reload()  //This is if you still want the page to reload (since e.preventDefault() cancelled that behavior) 
       }, (error) => {
@@ -18,6 +18,7 @@ export default function ContactPage() {
    return (
     <div>
       <h2>Contact Us</h2>
+      <div className="about-section-background">
       <form className="contact-form" onSubmit={sendEmail}>
         <input type="hidden" name="contact_number" />
         <div className="form-group">
@@ -32,8 +33,9 @@ export default function ContactPage() {
         <label>Message</label>
       <textarea name="message" className="form-control" placeholder="Enter your message" />
         </div>
-        <input type="submit" value="Send" className="btn btn-primary" />
+        <input type="submit" value="Send" className="btn btn-success" style={{ marginTop: '10px' }}/>
       </form>
+      </div>
     </div>
   );
 

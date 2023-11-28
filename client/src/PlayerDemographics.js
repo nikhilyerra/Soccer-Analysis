@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Bar } from 'react-chartjs-2';
 import Select from 'react-select';
 import { Line } from 'react-chartjs-2';
 import './App.css'; // Make sure you import the CSS file
@@ -127,14 +126,18 @@ function PlayerDemographics() {
         },
       };
     
-    const customStyles = {
+      const customStyles = {
         option: (provided, state) => ({
             ...provided,
             color:'black',
             // backgroundColor: state.isSelected ? '#4d94ff' : '#004d40', // Adjust the background color as needed
         }),
+        container: (provided) => ({
+          ...provided,
+          marginTop: '10px',
+          marginBottom: '10px', // Add 10px bottom margin to each Select component
+        }),
     };
-
 
     return (
         <div>
@@ -178,6 +181,7 @@ function PlayerDemographics() {
             
             {/* Dropdowns for foot, position, and club */}
             <Select
+                className="custom-select"
                 options={footOptions}
                 onChange={selectedOption => setSelectedFoot(selectedOption ? selectedOption.value : '')}
                 placeholder="Select Foot Preference"
@@ -185,6 +189,7 @@ function PlayerDemographics() {
                 styles={customStyles}
             />
             <Select
+                className="custom-select"
                 options={positionOptions}
                 onChange={selectedOption => setSelectedPosition(selectedOption ? selectedOption.value : '')}
                 placeholder="Select Position"
@@ -192,6 +197,7 @@ function PlayerDemographics() {
                 styles={customStyles}
             />
             <Select
+                className="custom-select"
                 options={clubs}
                 onChange={selectedOption => setSelectedClub(selectedOption ? selectedOption.value : '')}
                 placeholder="Select Club"
