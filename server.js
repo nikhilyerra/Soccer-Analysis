@@ -152,6 +152,67 @@ try {
 });
 
 
+app.post('/player-multicountry', async (req, res, next) => {
+  try {
+    // Extract countries list from request body
+    const countries = req.body.countries;
+
+    // Check if countries array is provided and is not empty
+    if (!countries || !countries.length) {
+      return res.status(400).json({ error: 'No countries provided.' });
+    }
+
+    // Prepare a query string with placeholders for countries
+    const placeholders = countries.map((_, index) => `:${index + 1}`).join(', ');
+
+    // Execute the query with the countries array
+    let result = await db.execute(
+      `SELECT NAME, player_id FROM PLAYERS WHERE COUNTY_OF_BIRTH IN (${placeholders})`,
+      countries
+    );
+
+    if (result && result.rows) {
+      res.json(result.rows);
+    } else {
+      res.status(500).json({ error: 'Unexpected database response.' });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/player-multiclub', async (req, res, next) => {
+  try {
+    // Extract countries list from request body
+    const clubs = req.body.clubs;
+
+    // Check if countries array is provided and is not empty
+    if (!clubs || !clubs.length) {
+      return res.status(400).json({ error: 'No clubs provided.' });
+    }
+
+    // Prepare a query string with placeholders for clubs
+    const placeholders = clubs.map((_, index) => `:${index + 1}`).join(', ');
+
+    // Execute the query with the clubs array
+    let result = await db.execute(
+      `SELECT player_id, name FROM players WHERE current_club_id  IN (${placeholders})`,
+      clubs
+    );
+
+    
+
+    if (result && result.rows) {
+      res.json(result.rows);
+    } else {
+      res.status(500).json({ error: 'Unexpected database response.' });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+
 
 app.get('/query1', async (req, res, next) => {
   console.log("here")
@@ -207,34 +268,74 @@ try {
   const club_id = req.query.club_id;
   const comp_id = req.query.comp_id;
   const range = req.query.range;
+  console.log(club_id)
+  console.log(comp_id)
+  console.log(range)
   let query = `
-          WITH minute_ranges AS (
-            SELECT
-              (level - 1) * :range + 1 AS range_start,
-              LEAST(level * :range, 120) AS range_end
-            FROM
-              dual
-            CONNECT BY
-              (level - 1) * :range < 120
-          )
-          SELECT
-            mr.range_start || '-' || mr.range_end AS minute_group,
-            COUNT(CASE WHEN ge.event_type = 'Goals' THEN ge.game_id END) AS goals,
-            COUNT(CASE WHEN ge.event_type = 'Substitutions' THEN ge.game_id END) AS substitutions
-          FROM
-          minute_ranges mr
-          JOIN game_events ge ON ge.game_minute BETWEEN mr.range_start AND mr.range_end
-          JOIN games g ON ge.game_id = g.game_id `;
+              WITH minute_ranges AS (
+                SELECT
+                  (level - 1) * :range + 1 AS range_start,
+                  LEAST(level * :range, 120) AS range_end
+                FROM
+                  dual
+                CONNECT BY
+                  (level - 1) * :range < 120
+              ),
+              event_counts AS (
+                SELECT
+                  ge.game_minute,
+                  ge.game_id,
+                  ge.event_type
+                FROM
+                  game_events ge
+                WHERE
+                  ge.club_id = :club_id
+                  AND ge.event_type IN ('Goals', 'Substitutions')
+              ),
+              joined_data AS (
+                SELECT
+                  mr.range_start,
+                  mr.range_end,
+                  ec.game_id,
+                  ec.event_type
+                FROM
+                  minute_ranges mr
+                JOIN
+                  event_counts ec
+                ON
+                  ec.game_minute BETWEEN mr.range_start AND mr.range_end
+                JOIN
+                  games g
+                ON
+                  ec.game_id = g.game_id `;
   if(comp_id){
     query = query + "AND g.competition_id = :comp_id "
-  }
-  query = query +   `WHERE
-                      ge.club_id = :club_id 
-                      AND ge.event_type IN ('Goals', 'Substitutions')
-                    GROUP BY
-                      mr.range_start, mr.range_end
-                    ORDER BY
-                      mr.range_start `;
+  }                
+                  
+  query = query+ `            ),
+              event_type_counts AS (
+                SELECT
+                  jd.range_start,
+                  jd.range_end,
+                  jd.game_id,
+                  SUM(CASE WHEN jd.event_type = 'Goals' THEN 1 ELSE 0 END) AS goal_count,
+                  SUM(CASE WHEN jd.event_type = 'Substitutions' THEN 1 ELSE 0 END) AS substitution_count
+                FROM
+                  joined_data jd
+                GROUP BY
+                  jd.range_start, jd.range_end, jd.game_id
+              )
+              SELECT
+                etc.range_start || '-' || etc.range_end AS minute_group,
+                SUM(etc.goal_count) AS goals,
+                SUM(etc.substitution_count) AS substitutions
+              FROM
+                event_type_counts etc
+              GROUP BY
+                etc.range_start, etc.range_end
+              ORDER BY
+                etc.range_start `;
+  
               
   let binds = {club_id, range, ...(comp_id && { comp_id })};
   let result = await db.execute(query, binds);

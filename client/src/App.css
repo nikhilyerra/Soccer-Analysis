@@ -79,6 +79,20 @@ nav.nav .nav-link:hover {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
+.home-page .row {
+  display: flex;
+  flex-wrap: wrap; /* This allows items to wrap to the next line */
+  justify-content: center; /* This will center the items on the line */
+  gap: 20px; /* This adds space between the cards */
+}
+
+.home-page .col-md-4 {
+  flex-basis: calc(50% - 10px); /* Adjust this value to increase/decrease card size */
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem; /* Adjust space between cards if necessary */
+}
+
 /* Set the default text color for the whole website */
 body, button, input, textarea, h1, h2, h3, h4, h5, h6, p, a, .nav-link {
   color: white; /* This will set the text color to white */
@@ -124,7 +138,7 @@ input::placeholder {
 }
 
 .logo {
-  height: 70px; 
+  height: 80px; 
   width: auto; 
   margin-right: 15px; 
 }
@@ -218,68 +232,103 @@ input::placeholder {
 }
 
 
-/* TreeView Styling */
-.tree-view-container {
-  background-color: #022403; /* Dark green color matching the field */
-  color: #e7f4e4; /* Light green color for text for readability */
-  padding: 10px;
-}
 
-/* TreeItem node styles */
-.tree-view-container .MuiTreeItem-root {
-  margin: 5px 0;
-  padding: 4px 8px;
-  border-left: 2px solid #0a4f0a; /* Darker green for border */
-}
 
-/* TreeItem label styles */
-.tree-view-container .MuiTreeItem-label {
-  font-weight: 500;
-  color: #d7ebda; /* Slightly darker text for contrast */
-}
-
-/* TreeItem on hover */
-.tree-view-container .MuiTreeItem-root:hover {
-  background-color: #034d03; /* Slightly lighter green on hover */
-  border-left-color: #0c9f0c; /* Bright green for border */
-}
-
-/* TreeItem selected and focused styles */
-.tree-view-container .Mui-selected, 
-.tree-view-container .Mui-focused {
-  background-color: #026402; /* Green that stands out for selected/focus */
-  border-left-color: #1db31d; /* Bright green for border */
-}
-
-/* Adjust the scrollbar to match the theme */
-.tree-view-container::-webkit-scrollbar {
-  width: 5px;
-}
-
-.tree-view-container::-webkit-scrollbar-thumb {
-  background-color: #0a4f0a; /* Dark green scrollbar thumb */
+.player-card {
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
   border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  margin: 20px;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.tree-view-container::-webkit-scrollbar-track {
-  background-color: #022403; /* Scrollbar track matches the container bg */
+.player-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* Ensure the box-sizing is border-box for all elements */
-*, *::before, *::after {
-  box-sizing: border-box;
+.player-card-image-container {
+  flex-shrink: 0; /* Prevent image container from shrinking */
+  width: 120px; /* Fixed width for the image */
+  height: 190px; /* Fixed height for the image */
+  /*border-radius: 50%; /* Circular image */
+  overflow: hidden; /* Hide overflow */
+  margin-right: 20px; /* Space between image and details */
 }
 
-/* Additional padding and margin adjustments if necessary */
-.tree-view-container .MuiTreeItem-content {
-  padding-left: 10px; /* Align text better within the tree structure */
+.player-image {
+  width: 100%;
+  height: auto;
+  display: block; /* Remove any extra space below the image */
 }
 
-.tree-view-container .MuiTreeItem-group {
-  margin-left: 15px; /* Indent child nodes for clarity */
+.player-card-info {
+  color: white; /* White text for readability */
 }
 
-/* If icons are used, they should also match the color theme */
-.tree-view-container .MuiTreeItem-iconContainer .MuiSvgIcon-root {
-  color: #d7ebda; /* Light green color for icons */
+.player-card-name {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.player-card-detail {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+
+
+.player-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px; /* This adds space between the cards */
+}
+
+.player-card {
+  flex: 0 1 calc(33.333% - 20px); /* Subtract the gap from the percentage */
+  display: flex;
+  flex-direction: column; /* Stack the card content vertically */
+  align-items: center; /* Center the content */
+  background-color: rgba(0, 0, 0, 0.7); 
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin: 10px 0; /* Margin top and bottom */
+  max-width: 300px; /* Maximum width of the cards */
+}
+
+.player-card img {
+  width: 100%; /* Make image responsive within the container */
+  height: auto;
+  border-radius: 10px; /* Rounded corners for the images */
+}
+
+/* Ensure images scale down on smaller screens */
+@media (max-width: 1200px) {
+  .player-card {
+    flex: 0 1 calc(50% - 20px); /* Show 2 cards per row on medium screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .player-card {
+    flex: 0 1 100%; /* Stack cards on small screens */
+  }
+}
+
+
+/* App.css */
+
+.large-font {
+  font-size: 18px; /* Adjust the value to your preferred font size */
+}
+
+.input-field {
+  color: black;
+  margin-right: 20px; /* Add a right margin to create gaps between fields */
 }

@@ -15,7 +15,7 @@ import axios from 'axios';
 import './App.css'; 
 import logo from './images/logo.png'; 
 
-
+import Breadcrumbs from './Breadcrumbs.js';
 
 
 function App() {
@@ -25,13 +25,14 @@ function App() {
                 <header className="text-center mb-5">
                 <div className="header-content d-flex align-items-center justify-content-center"> 
                         <img src={logo} alt="Logo" className="logo mr-3" /> 
-                        <h1>Foot Game</h1>
+                        <h1>Goal Track Pro</h1>
                     </div>
                     <nav className="nav justify-content-center">
                         <Link to="/" className="nav-link">Home</Link>
                         <Link to="/about" className="nav-link">About</Link>
                         <Link to="/contact" className="nav-link">Contact</Link>
                     </nav>
+                    
                 </header>
             <Routes>
                     <Route path="/" element={<HomePage />} />
@@ -77,9 +78,8 @@ function HomePage() {
             <section className="d-flex justify-content-center mt-4">
                 <div className="row">
                     {[
-                        { path: "/general-stats", image: "home_tile1.png", alt: "General Stats Icon", text: "General Stats" },
+                        { path: "/general-stats", image: "home_tile1_.png", alt: "General Stats Icon", text: "Player Profiles" },
                         { path: "/trend-queries", image: "home_tile2.png", alt: "Trend Queries Icon", text: "Trend Queries" },
-                        { path: "/sql-editor", image: "home_tile3.png", alt: "SQL Editor Icon", text: "SQL Editor" }
                     ].map((item, idx) => (
                         <div key={idx} className="col-md-4 mb-4">
                             <Link to={item.path} className="btn btn-primary btn-lg btn-block d-flex flex-column align-items-center">
@@ -155,9 +155,8 @@ function AboutPage() {
             <h4>Innovative Analysis Tools</h4>
             <p>Our website is designed to be a hub for soccer trend analysis. We offer a range of analytical tools and features, including:</p>
             <ul>
+                <li><strong>Player Profiles:</strong> A curated display of player details, providing insights into individual soccer talents from around the world.</li>
                 <li><strong>Trend Analysis:</strong> Visual representations and in-depth analysis of soccer games, enabling users to discern emerging trends and patterns.</li>
-                <li><strong>General Statistics:</strong> A comprehensive collection of statistics, offering a snapshot of various aspects of soccer from a global perspective.</li>
-                <li><strong>SQL Editor:</strong> For the more technically inclined, our SQL editor allows direct queries into our database, providing a flexible and powerful way to explore the data.</li>
             </ul>
             
             <p>Whether you are a soccer analyst looking to delve into player performance metrics, a club official exploring strategic insights, or a fan keen on understanding the nuances of your favorite team, our platform caters to all.</p>

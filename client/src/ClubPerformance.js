@@ -80,12 +80,14 @@ function ClubPerformance() {
             data: queryResults?.map(result => result.GOALS),
             borderColor: 'blue',
             backgroundColor: 'rgba(0, 0, 255, 0.5)',
+            tension: 0.5
           },
           {
             label: 'Substitutions',
             data: queryResults?.map(result => result.SUBSTITUTIONS),
             borderColor: 'red',
             backgroundColor: 'rgba(255, 0, 0, 0.5)',
+            tension: 0.5
           }
         ]
       };
@@ -133,7 +135,8 @@ function ClubPerformance() {
     return (
         <div>
             <h2>Club Performance</h2>
-            
+            <p className="large-font">Trend of goals scored and substitutions made by a soccer club over specified game intervals</p>
+
             <div className="dropdowns-container" style={{ marginBottom: '10px' }}>
                 <Select
                     className="custom-select"

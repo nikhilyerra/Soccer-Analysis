@@ -155,6 +155,8 @@ function HomeAwayPerformance() {
   return (
     <div>
       <h2>Home and Away Performance</h2>
+      <p className="large-font">Evaluate player performance at home and away matches</p>
+
 
       <div className="dropdowns-container" style={{ marginBottom: '10px' }}>
         <Select
@@ -176,7 +178,7 @@ function HomeAwayPerformance() {
           value={maxRedCards}
           onChange={e => setMaxRedCards(e.target.value)}
           placeholder="Max Red Cards"
-          className="custom-select"
+          className="input-field"
           min="0"
           style={{ color: 'black' }}
         />
@@ -185,7 +187,7 @@ function HomeAwayPerformance() {
           value={maxYellowCards}
           onChange={e => setMaxYellowCards(e.target.value)}
           placeholder="Max Yellow Cards"
-          className="custom-select"
+          className="input-field"
           min="0"
           style={{ color: 'black' }}
         />
@@ -194,7 +196,7 @@ function HomeAwayPerformance() {
           value={minMinutesPlayed}
           onChange={e => setMinMinutesPlayed(e.target.value)}
           placeholder="Min Minutes Played"
-          className="custom-select"
+          className="input-field"
           min="0"
           style={{ color: 'black' }}
         />
@@ -210,10 +212,7 @@ function HomeAwayPerformance() {
           <div style={{ backgroundColor: 'white', padding: '1rem' }}>
             <Line data={chartData} options={chartOptions} />
           </div>
-          <div style={{ backgroundColor: 'white', padding: '1rem', marginTop: '20px' }}>
-            <h3>Bar Chart Representation</h3>
-            <Bar data={chartData} options={chartOptions} />
-          </div>
+          
         </div>
       )}
     </div>

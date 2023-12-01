@@ -106,12 +106,14 @@ function PlayerPerformance() {
             data: queryResults?.map(result => result.COUNTRYA_AVG_GOALS),
             borderColor: 'blue',
             backgroundColor: 'rgba(0, 0, 255, 0.5)',
+            tension: 0.2
           },
           {
             label: selectedCountryB,
             data: queryResults?.map(result => result.COUNTRYB_AVG_GOALS),
             borderColor: 'red',
             backgroundColor: 'rgba(255, 0, 0, 0.5)',
+            tension: 0.2
           }
         ]
       };
@@ -161,6 +163,8 @@ function PlayerPerformance() {
         <div>
             {/* Insert the content of your page here */}
             <h2>Player Performance</h2>
+            <p className="large-font">Performance trend of players from chosen countries across competitions</p>
+
             {/* ... other components */}
             
             {/* Dropdowns at the bottom */}

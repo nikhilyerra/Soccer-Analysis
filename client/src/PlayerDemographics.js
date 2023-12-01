@@ -29,7 +29,11 @@ function PlayerDemographics() {
     const [clubs, setClubs] = useState([]);
     const [selectedFoot, setSelectedFoot] = useState('');
     const [selectedPosition, setSelectedPosition] = useState('');
-    const [selectedClub, setSelectedClub] = useState('');
+    const [seasonLabels, setSeasonLabels] = useState('');
+
+    // const [selectedClub, setSelectedClub] = useState('');
+    const [selectedClubs, setSelectedClubs] = useState([]);
+
     const [minHeight, setMinHeight] = useState('');
     const [maxHeight, setMaxHeight] = useState('');
     const [minAge, setMinAge] = useState('');
@@ -63,8 +67,16 @@ function PlayerDemographics() {
         { value: 'Defender', label: 'Defender' },
         { value: 'Goalkeeper', label: 'Goalkeeper' }
     ];
+    const generateColor = (index, total) => {
+      const hue = (360 * index) / total; // Distribute hues around the color wheel
+      return `hsl(${hue}, 70%, 60%)`; // Adjust saturation and lightness as needed
+    };
+    
+    const handleRunQuery = async () => {
+      try {
+      const selectedClubIds = selectedClubs.map(club => club.value); // Extract club IDs from selected clubs
+      const promises = selectedClubs.map(club => 
 
-    const handleRunQuery = () => {
 
         axios.get('/query6', {
             params: {
@@ -74,28 +86,44 @@ function PlayerDemographics() {
                 max_age: maxAge,
                 foot: selectedFoot,
                 position: selectedPosition,
-                club_id: selectedClub
-            }
-        })
-        .then(response => {
-            setQueryResults(response.data); // Save the query results
-        })
-        .catch(error => {
-            console.error('There was an error running the query!', error);
-        });
-    };
+                // club_id: selectedClub
+                // club_ids: selectedClubIds
+                club_id: club.value
+              }
+          })
+      );
 
-    const chartData = {
-        labels: queryResults?.map(result => result.SEASON),
-        datasets: [
-          {
-            label: 'Team A',
-            data: queryResults?.map(result => result.WIN_PERCENTAGE),
-            borderColor: 'blue',
-            backgroundColor: 'rgba(0, 0, 255, 0.5)',
-          }
-        ]
-      };
+      const results = await Promise.all(promises);
+
+      let seasonLabels = []; // To store unique season years
+      const totalClubs = selectedClubs.length;
+
+    const aggregatedResults = results.map((response, index) => {
+      const color = generateColor(index, totalClubs); 
+        if (index === 0) { // Only for the first set of results
+            seasonLabels = response.data.map(data => data.SEASON); // Extract the seasons
+        }
+
+        return {
+            label: `Team ${selectedClubs[index].label}`,
+            data: response.data.map(data => data.WIN_PERCENTAGE),
+            borderColor: color,
+            backgroundColor: color,
+            tension: 0.2
+        };
+    });
+
+    setQueryResults(aggregatedResults);
+    setSeasonLabels(seasonLabels); // Store the season labels in state
+  } catch (error) {
+    console.error('There was an error running the query!', error);
+  }
+};
+
+const chartData = {
+  labels: seasonLabels, // Use the season years as labels
+  datasets: queryResults || []
+};
     
       const chartOptions = {
         responsive: true,
@@ -105,7 +133,7 @@ function PlayerDemographics() {
           },
           title: {
             display: true,
-            text: "Performance of Player's from different Countries",
+            text: "Team Performance",
           },
         },
         scales: {
@@ -142,6 +170,8 @@ function PlayerDemographics() {
     return (
         <div>
             <h2>Player Demographics</h2>
+            <p className="large-font">Analyze team performance trends based on average player demographics</p>
+
             
             {/* Input fields for height and age */}
             <div>
@@ -151,6 +181,8 @@ function PlayerDemographics() {
                     value={minHeight}
                     onChange={(e) => setMinHeight(e.target.value)}
                     style={{ color: 'black' }}
+                    className="input-field"
+
                     
                 />
                 <input
@@ -159,6 +191,8 @@ function PlayerDemographics() {
                     value={maxHeight}
                     onChange={(e) => setMaxHeight(e.target.value)}
                     style={{ color: 'black' }}
+                    className="input-field"
+
                  
                 />
                 <input
@@ -167,6 +201,8 @@ function PlayerDemographics() {
                     value={minAge}
                     onChange={(e) => setMinAge(e.target.value)}
                     style={{ color: 'black' }}
+                    className="input-field"
+
                   
                 />
                 <input
@@ -199,9 +235,10 @@ function PlayerDemographics() {
             <Select
                 className="custom-select"
                 options={clubs}
-                onChange={selectedOption => setSelectedClub(selectedOption ? selectedOption.value : '')}
-                placeholder="Select Club"
-                isClearable
+                onChange={selectedOptions => setSelectedClubs(selectedOptions || [])}
+                placeholder="Select Clubs"
+                isMulti // Enable multiple selection
+                closeMenuOnSelect={false} // Keep the menu open after selection
                 styles={customStyles}
             />
 
@@ -210,7 +247,7 @@ function PlayerDemographics() {
             </button>
             
             {/* Results section */}
-            {queryResults && (
+            {queryResults && queryResults.length > 0 && (
                 <div>
                     <h2>Query Results:</h2>
                     <div style={{ backgroundColor: 'white', padding: '1rem' }}>
