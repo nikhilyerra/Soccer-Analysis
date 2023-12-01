@@ -128,6 +128,38 @@ function PlayerPerformance() {
             display: true,
             text: "Performance of Player's from different Countries",
           },
+          tooltip: {
+            callbacks: {
+              afterLabel: function(context) {
+                const labelIndex = context.dataIndex;
+                const datasetIndex = context.datasetIndex;
+                const season = context.chart.data.labels[labelIndex];
+                const data = queryResults.find(item => item.SEASON === season);
+
+                if (data) {
+                    // Append the average assists on a new line
+                    let additionalInfo = '';
+
+                        // Append the average assists, yellow cards, red cards, and total appearances
+                        if (datasetIndex === 0) { // Country A
+                            additionalInfo += `Avg Assists: ${data.COUNTRYA_AVG_ASSISTS.toFixed(2)}\n`;
+                            additionalInfo += `Avg Yellow Cards: ${data.COUNTRYA_AVG_YELLOW_CARDS.toFixed(2)}\n`;
+                            additionalInfo += `Avg Red Cards: ${data.COUNTRYA_AVG_RED_CARDS.toFixed(2)}\n`;
+                            additionalInfo += `Total Appearances: ${data.COUNTRYA_TOTAL_APPEARANCES}`;
+                        } else if (datasetIndex === 1) { // Country B
+                            additionalInfo += `Avg Assists: ${data.COUNTRYB_AVG_ASSISTS.toFixed(2)}\n`;
+                            additionalInfo += `Avg Yellow Cards: ${data.COUNTRYB_AVG_YELLOW_CARDS.toFixed(2)}\n`;
+                            additionalInfo += `Avg Red Cards: ${data.COUNTRYB_AVG_RED_CARDS.toFixed(2)}\n`;
+                            additionalInfo += `Total Appearances: ${data.COUNTRYB_TOTAL_APPEARANCES}`;
+                        }
+
+                        return additionalInfo;
+                }
+
+                return '';
+            }
+            }
+        }
         },
         scales: {
           x: {

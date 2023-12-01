@@ -15,7 +15,6 @@ import axios from 'axios';
 import './App.css'; 
 import logo from './images/logo.png'; 
 
-import Breadcrumbs from './Breadcrumbs.js';
 
 
 function App() {

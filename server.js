@@ -222,34 +222,118 @@ try {
   const comp_id = req.query.comp_id;
   const position = req.query.position
   let query = `
-            SELECT 
-              g.season,
-              CASE 
-                WHEN COUNT(DISTINCT CASE WHEN p.country_of_citizenship = :countryA THEN a.player_id END) = 0 
-                THEN 0 
-                ELSE SUM(CASE WHEN p.country_of_citizenship = :countryA THEN a.goals ELSE 0 END) / 
-                    COUNT(DISTINCT CASE WHEN p.country_of_citizenship = :countryA THEN a.player_id END) 
-              END AS countryA_avg_goals,
-              CASE 
-                WHEN COUNT(DISTINCT CASE WHEN p.country_of_citizenship = :countryB THEN a.player_id END) = 0 
-                THEN 0 
-                ELSE SUM(CASE WHEN p.country_of_citizenship = :countryB THEN a.goals ELSE 0 END) / 
-                    COUNT(DISTINCT CASE WHEN p.country_of_citizenship = :countryB THEN a.player_id END) 
-              END AS countryB_avg_goals
-              FROM appearances a
-              JOIN players p ON a.player_id = p.player_id
-              JOIN games g ON a.game_id = g.game_id
-              WHERE p.country_of_citizenship IN (:countryA, :countryB) `;
-  if(comp_id){
-    query = query + "AND a.competition_id = :comp_id ";
-  }
-  if(position){
-    query = query + "AND p.position = :position "
-  }
-
-  query = query + "GROUP BY g.season ORDER BY g.season"
+            WITH PlayerAppearances AS (
+              SELECT 
+                  g.season,
+                  p.player_id,
+                  p.country_of_citizenship,
+                  a.goals,
+                  a.assists,
+                  a.yellow_cards,
+                  a.red_cards,
+                  a.competition_id,
+                  p.position
+              FROM 
+                appearances a
+              JOIN 
+                players p ON a.player_id = p.player_id
+              JOIN 
+                games g ON a.game_id = g.game_id
+              WHERE 
+                p.country_of_citizenship IN (:countryA, :countryB)
+          ),
+          FilteredAppearances AS (
+              SELECT 
+                  season,
+                  player_id,
+                  country_of_citizenship,
+                  goals,
+                  assists,
+                  yellow_cards,
+                  red_cards
+              FROM 
+                PlayerAppearances
+              WHERE 
+                (:comp_id IS NULL OR competition_id = :comp_id)
+                AND (:position IS NULL OR position = :position)
+          ),
+          CountryStats AS (
+              SELECT 
+                  season,
+                  country_of_citizenship,
+                  COUNT(DISTINCT player_id) AS distinct_players,
+                  SUM(goals) AS total_goals,
+                  SUM(assists) AS total_assists,
+                  SUM(yellow_cards) AS total_yellow_cards,
+                  SUM(red_cards) AS total_red_cards,
+                  COUNT(player_id) AS total_appearances
+              FROM 
+                FilteredAppearances
+              GROUP BY 
+                season, country_of_citizenship
+          )
+          SELECT 
+              fa.season,
+              COALESCE(
+                  (SELECT total_goals / NULLIF(distinct_players, 0)
+                  FROM CountryStats
+                  WHERE season = fa.season AND country_of_citizenship = :countryA),
+              0) AS countryA_avg_goals,
+              COALESCE(
+                  (SELECT total_assists / NULLIF(distinct_players, 0)
+                  FROM CountryStats
+                  WHERE season = fa.season AND country_of_citizenship = :countryA),
+              0) AS countryA_avg_assists,
+              COALESCE(
+                  (SELECT total_yellow_cards / NULLIF(distinct_players, 0)
+                  FROM CountryStats
+                  WHERE season = fa.season AND country_of_citizenship = :countryA),
+              0) AS countryA_avg_yellow_cards,
+              COALESCE(
+                  (SELECT total_red_cards / NULLIF(distinct_players, 0)
+                  FROM CountryStats
+                  WHERE season = fa.season AND country_of_citizenship = :countryA),
+              0) AS countryA_avg_red_cards,
+              COALESCE(
+                  (SELECT total_appearances
+                  FROM CountryStats
+                  WHERE season = fa.season AND country_of_citizenship = :countryA),
+              0) AS countryA_total_appearances,
+              COALESCE(
+                  (SELECT total_goals / NULLIF(distinct_players, 0)
+                  FROM CountryStats
+                  WHERE season = fa.season AND country_of_citizenship = :countryB),
+              0) AS countryB_avg_goals,
+              COALESCE(
+                  (SELECT total_assists / NULLIF(distinct_players, 0)
+                  FROM CountryStats
+                  WHERE season = fa.season AND country_of_citizenship = :countryB),
+              0) AS countryB_avg_assists,
+              COALESCE(
+                  (SELECT total_yellow_cards / NULLIF(distinct_players, 0)
+                  FROM CountryStats
+                  WHERE season = fa.season AND country_of_citizenship = :countryB),
+              0) AS countryB_avg_yellow_cards,
+              COALESCE(
+                  (SELECT total_red_cards / NULLIF(distinct_players, 0)
+                  FROM CountryStats
+                  WHERE season = fa.season AND country_of_citizenship = :countryB),
+              0) AS countryB_avg_red_cards,
+              COALESCE(
+                  (SELECT total_appearances
+                  FROM CountryStats
+                  WHERE season = fa.season AND country_of_citizenship = :countryB),
+              0) AS countryB_total_appearances
+          FROM 
+            FilteredAppearances fa
+          GROUP BY 
+            fa.season
+          ORDER BY 
+            fa.season
+          `;
+ 
               
-  let binds = {countryA, countryB, ...(comp_id && { comp_id }), ...(position && { position })};
+  let binds = {countryA, countryB, comp_id, position};
   let result = await db.execute(query, binds);
   console.log(result);
   if (result && result.rows) {
@@ -408,51 +492,83 @@ try {
 
 app.get('/query6', async (req, res, next) => {
   console.log("here")
+  console.log(req.query.height)
+  console.log(req.query.age)
 try {
-  const min_height = req.query.min_height;
-  const max_height = req.query.max_height;
-  const min_age= req.query.min_age;
-  const max_age= req.query.max_age;
+  const height = req.query.height;
+  const age= req.query.age;
   const foot = req.query.foot;
   const position = req.query.position;
   const club_id = req.query.club_id;
   let query = `
-              WITH FilteredPlayers AS (
+            WITH 
+            FilteredPlayersLessOrEqual AS (
                 SELECT player_id
                 FROM players
-                WHERE height_in_cm BETWEEN :min_height AND :max_height
-                  AND (EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM date_of_birth)) BETWEEN :min_age AND :max_age
-                  AND foot = :foot
-                  AND position = :position
+                WHERE height_in_cm <= :height
+                  AND (EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM date_of_birth)) <= :age
+                  AND (:foot is NULL or foot = :foot)
+                  AND (:position is NULL or position = :position)
             ),
-            FilteredAppearances AS (
+            FilteredPlayersGreater AS (
+                SELECT player_id
+                FROM players
+                WHERE height_in_cm > :height
+                  AND (EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM date_of_birth)) > :age
+                  AND (:foot is NULL or foot = :foot)
+                  AND (:position is NULL or position = :position)
+            ),
+            FilteredAppearancesLessOrEqual AS (
                 SELECT a.game_id
                 FROM appearances a
-                JOIN FilteredPlayers fp ON a.player_id = fp.player_id
+                JOIN FilteredPlayersLessOrEqual fp ON a.player_id = fp.player_id
             ),
-            FilteredGames AS (
+            FilteredAppearancesGreater AS (
+                SELECT a.game_id
+                FROM appearances a
+                JOIN FilteredPlayersGreater fp ON a.player_id = fp.player_id
+            ),
+            FilteredGamesLessOrEqual AS (
                 SELECT g.season, cg.is_win
                 FROM club_games cg
-                JOIN FilteredAppearances fa ON cg.game_id = fa.game_id
+                JOIN FilteredAppearancesLessOrEqual fa ON cg.game_id = fa.game_id
                 JOIN games g ON cg.game_id = g.game_id
-                WHERE cg.club_id = :club_id
+                WHERE (:club_id is NULL or cg.club_id = :club_id)
             ),
-            SeasonWinStats AS (
+            FilteredGamesGreater AS (
+                SELECT g.season, cg.is_win
+                FROM club_games cg
+                JOIN FilteredAppearancesGreater fa ON cg.game_id = fa.game_id
+                JOIN games g ON cg.game_id = g.game_id
+                WHERE (:club_id is NULL OR cg.club_id = :club_id)
+            ),
+            SeasonWinStatsLessOrEqual AS (
                 SELECT 
                     season, 
                     COUNT(*) AS total_games, 
                     SUM(CASE WHEN is_win = 1 THEN 1 ELSE 0 END) AS wins
-                FROM FilteredGames
+                FROM FilteredGamesLessOrEqual
+                GROUP BY season
+            ),
+            SeasonWinStatsGreater AS (
+                SELECT 
+                    season, 
+                    COUNT(*) AS total_games, 
+                    SUM(CASE WHEN is_win = 1 THEN 1 ELSE 0 END) AS wins
+                FROM FilteredGamesGreater
                 GROUP BY season
             )
             SELECT 
-                season, 
-                ROUND((wins / total_games) * 100, 2) AS win_percentage
-            FROM SeasonWinStats
-            ORDER BY season
+                s1.season, 
+                ROUND((s1.wins / s1.total_games) * 100, 2) AS win_percentage_less_or_equal,
+                ROUND((s2.wins / s2.total_games) * 100, 2) AS win_percentage_greater
+            FROM SeasonWinStatsLessOrEqual s1
+            JOIN SeasonWinStatsGreater s2 ON s1.season = s2.season
+            ORDER BY s1.season
+  
             `;
               
-  let binds = {min_age,max_age,min_height,max_height,foot,position,club_id};
+  let binds = {age,height,foot,position,club_id};
   let result = await db.execute(query, binds);
   console.log(result);
   if (result && result.rows) {
@@ -473,28 +589,66 @@ try {
   const min_minutes_played= req.query.min_minutes_played;
   const player_id= req.query.player_id;
   let query = `
-              SELECT 
-                g.season,
-                (COUNT(CASE WHEN g.home_club_id = a.player_club_id AND cg.is_win = 1 THEN 1 END) / 
-                  NULLIF(COUNT(CASE WHEN g.home_club_id = a.player_club_id THEN 1 END), 0)) * 100 AS home_win_percentage,
-                (COUNT(CASE WHEN g.away_club_id = a.player_club_id AND cg.is_win = 1 THEN 1 END) / 
-                  NULLIF(COUNT(CASE WHEN g.away_club_id = a.player_club_id THEN 1 END), 0)) * 100 AS away_win_percentage
-              FROM 
-                appearances a
-              INNER JOIN 
-                games g ON a.game_id = g.game_id
-              INNER JOIN 
-                club_games cg ON g.game_id = cg.game_id
-              WHERE 
-                a.player_id = :player_id AND 
-                (a.player_club_id = g.home_club_id OR a.player_club_id = g.away_club_id) AND
-                a.minutes_played > :min_minutes_played AND 
-                a.red_cards <= :max_red_cards AND 
-                a.yellow_cards <= :max_yellow_cards
-              GROUP BY 
-                g.season
-              ORDER BY 
-                g.season ASC
+              WITH PlayerAppearances AS (
+                SELECT 
+                    a.player_id, 
+                    a.game_id, 
+                    a.player_club_id, 
+                    a.minutes_played, 
+                    a.red_cards, 
+                    a.yellow_cards
+                FROM 
+                    appearances a
+                WHERE 
+                    a.player_id = :player_id AND 
+                    a.minutes_played > :min_minutes_played AND 
+                    a.red_cards <= :max_red_cards AND 
+                    a.yellow_cards <= :max_yellow_cards
+            ),
+            GameDetails AS (
+                SELECT 
+                    g.season, 
+                    g.game_id, 
+                    g.home_club_id, 
+                    g.away_club_id
+                FROM 
+                    games g
+            ),
+            ClubGameResults AS (
+                SELECT 
+                    cg.game_id, 
+                    cg.is_win
+                FROM 
+                    club_games cg
+            ),
+            SeasonalPerformance AS (
+                SELECT 
+                    gd.season,
+                    pa.game_id,
+                    pa.player_club_id,
+                    cgr.is_win,
+                    CASE WHEN gd.home_club_id = pa.player_club_id THEN 'Home' ELSE 'Away' END AS game_location
+                FROM 
+                    PlayerAppearances pa
+                INNER JOIN 
+                    GameDetails gd ON pa.game_id = gd.game_id
+                INNER JOIN 
+                    ClubGameResults cgr ON gd.game_id = cgr.game_id
+                WHERE 
+                    pa.player_club_id = gd.home_club_id OR pa.player_club_id = gd.away_club_id
+            )
+            SELECT 
+                sp.season,
+                ROUND((COUNT(CASE WHEN sp.game_location = 'Home' AND sp.is_win = 1 THEN 1 END) / 
+                      NULLIF(COUNT(CASE WHEN sp.game_location = 'Home' THEN 1 END), 0)) * 100, 2) AS home_win_percentage,
+                ROUND((COUNT(CASE WHEN sp.game_location = 'Away' AND sp.is_win = 1 THEN 1 END) / 
+                      NULLIF(COUNT(CASE WHEN sp.game_location = 'Away' THEN 1 END), 0)) * 100, 2) AS away_win_percentage
+            FROM 
+                SeasonalPerformance sp
+            GROUP BY 
+                sp.season
+            ORDER BY 
+                sp.season ASC
             `;
               
   let binds = {max_red_cards,max_yellow_cards,min_minutes_played,player_id};
@@ -572,6 +726,89 @@ app.post('/send-email', (req, res) => {
   });
 });
 
+app.get('/query7', async (req, res, next) => {
+  console.log("here")
+try {
+  const max_red_cards = req.query.max_red_cards;
+  const max_yellow_cards = req.query.max_yellow_cards;
+  const min_minutes_played= req.query.min_minutes_played;
+  const player_id= req.query.player_id;
+  let query = `
+  WITH PlayerAppearances AS (
+    SELECT 
+        a.player_id, 
+        a.game_id, 
+        a.player_club_id, 
+        a.minutes_played, 
+        a.red_cards, 
+        a.yellow_cards
+    FROM 
+        appearances a
+    WHERE 
+        a.player_id = :player_id AND 
+        a.minutes_played > :min_minutes_played AND 
+        a.red_cards <= :max_red_cards AND 
+        a.yellow_cards <= :max_yellow_cards
+),
+GameDetails AS (
+    SELECT 
+        g.season, 
+        g.game_id, 
+        g.home_club_id, 
+        g.away_club_id
+    FROM 
+        games g
+),
+ClubGameResults AS (
+    SELECT 
+        cg.game_id, 
+        cg.is_win
+    FROM 
+        club_games cg
+),
+SeasonalPerformance AS (
+    SELECT 
+        gd.season,
+        pa.game_id,
+        pa.player_club_id,
+        cgr.is_win,
+        CASE WHEN gd.home_club_id = pa.player_club_id THEN 'Home' ELSE 'Away' END AS game_location
+    FROM 
+        PlayerAppearances pa
+    INNER JOIN 
+        GameDetails gd ON pa.game_id = gd.game_id
+    INNER JOIN 
+        ClubGameResults cgr ON gd.game_id = cgr.game_id
+    WHERE 
+        pa.player_club_id = gd.home_club_id OR pa.player_club_id = gd.away_club_id
+)
+SELECT 
+    sp.season,
+    ROUND((COUNT(CASE WHEN sp.game_location = 'Home' AND sp.is_win = 1 THEN 1 END) / 
+           NULLIF(COUNT(CASE WHEN sp.game_location = 'Home' THEN 1 END), 0)) * 100, 2) AS home_win_percentage,
+    ROUND((COUNT(CASE WHEN sp.game_location = 'Away' AND sp.is_win = 1 THEN 1 END) / 
+           NULLIF(COUNT(CASE WHEN sp.game_location = 'Away' THEN 1 END), 0)) * 100, 2) AS away_win_percentage
+FROM 
+    SeasonalPerformance sp
+GROUP BY 
+    sp.season
+ORDER BY 
+    sp.season ASC
+
+            `;
+              
+  let binds = {max_red_cards,max_yellow_cards,min_minutes_played,player_id};
+  let result = await db.execute(query, binds);
+  console.log(result);
+  if (result && result.rows) {
+    res.json(result.rows);
+  } else {
+    res.status(500).json({ error: 'Unexpected database response.' });
+  }
+} catch (err) {
+  next(err);
+}
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

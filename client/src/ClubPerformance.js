@@ -29,10 +29,10 @@ ChartJS.register(
 function ClubPerformance() {
     const [clubs, setClubs] = useState([]);
     const [competitions, setCompetitions] = useState([]);
-    const [selectedClub, setSelectedClub] = useState(null);
+    const [selectedClubs, setSelectedClubs] = useState([]);
     const [selectedCompetition, setSelectedCompetition] = useState(null);
     const [range, setRange] = useState('');
-    const [queryResults, setQueryResults] = useState(null);
+    const [queryResults, setQueryResults] = useState([]);
 
     useEffect(() => {
         axios.get('/clubs').then(response => {
@@ -59,39 +59,54 @@ function ClubPerformance() {
     }));
 
     const handleRunQuery = () => {
-        axios.get('/query2', {
-            params: {
-                club_id: selectedClub,
-                comp_id: selectedCompetition,
-                range: range
-            }
-        }).then(response => {
-            setQueryResults(response.data);
-        }).catch(error => {
-            console.error('There was an error running the query!', error);
-        });
-    };
+      Promise.all(selectedClubs.map(club =>
+          axios.get('/query2', {
+              params: {
+                  club_id: club,
+                  comp_id: selectedCompetition,
+                  range: range
+              }
+          })
+      )).then(responses => {
+          setQueryResults(responses.map((response, index) => ({ 
+              data: response.data, 
+              clubId: selectedClubs[index] 
+          })));
+      }).catch(error => {
+          console.error('There was an error running the query!', error);
+      });
+  };
+  
+  const chartData = {
+    labels: queryResults.length > 0 ? queryResults[0].data.map(result => result.MINUTE_GROUP) : [],
+    datasets: queryResults.flatMap((resultObj, index) => {
+        const club = clubs.find(club => club.CLUB_ID === resultObj.clubId);
+        if (!club) return []; // Skip if the club is not found
 
-    const chartData = {
-        labels: queryResults?.map(result => result.MINUTE_GROUP),
-        datasets: [
+        const { data: results } = resultObj;
+        return [
           {
-            label: 'Goals',
-            data: queryResults?.map(result => result.GOALS),
-            borderColor: 'blue',
-            backgroundColor: 'rgba(0, 0, 255, 0.5)',
-            tension: 0.5
+            label: `Goals - ${clubs.find(club => club.CLUB_ID === selectedClubs[index]).NAME}`,
+            data: results.map(result => result.GOALS),
+            borderColor: `hsl(${index * 137}, 70%, 50%)`,
+            backgroundColor: `hsla(${index * 137}, 70%, 50%, 0.5)`,
+            tension: 0.5,
+            pointRadius: 6,
+              pointHoverRadius: 6,
+            
+            pointStyle: 'triangle'
           },
           {
-            label: 'Substitutions',
-            data: queryResults?.map(result => result.SUBSTITUTIONS),
-            borderColor: 'red',
-            backgroundColor: 'rgba(255, 0, 0, 0.5)',
-            tension: 0.5
+            label: `Substitutions - ${clubs.find(club => club.CLUB_ID === selectedClubs[index]).NAME}`,
+            data: results.map(result => result.SUBSTITUTIONS),
+            borderColor: `hsl(${index * 137 + 20}, 70%, 50%)`,
+            backgroundColor: `hsla(${index * 137 + 20}, 70%, 50%, 0.5)`,
+            tension: 0.5,
+            pointStyle: 'circle'
           }
-        ]
-      };
-    
+        ];
+    })
+};
       const chartOptions = {
         responsive: true,
         plugins: {
@@ -124,26 +139,26 @@ function ClubPerformance() {
         option: (provided, state) => ({
             ...provided,
             color:'black',
-            // backgroundColor: state.isSelected ? '#4d94ff' : '#004d40', // Adjust the background color as needed
         }),
         container: (provided) => ({
           ...provided,
           marginTop: '10px',
-          marginBottom: '10px', // Add 10px bottom margin to each Select component
+          marginBottom: '10px',
         }),
     };
     return (
         <div>
             <h2>Club Performance</h2>
-            <p className="large-font">Trend of goals scored and substitutions made by a soccer club over specified game intervals</p>
+            <p className="large-font">Trend of goals scored and substitutions made by soccer clubs over specified game intervals</p>
 
             <div className="dropdowns-container" style={{ marginBottom: '10px' }}>
                 <Select
                     className="custom-select"
                     options={clubOptions}
-                    onChange={selectedOption => setSelectedClub(selectedOption ? selectedOption.value : null)}
+                    onChange={selectedOptions => setSelectedClubs(selectedOptions ? selectedOptions.map(option => option.value) : [])}
                     placeholder="Select Club"
                     styles={customStyles}
+                    isMulti
                 />
                 <Select
                     className="custom-select"
@@ -168,7 +183,7 @@ function ClubPerformance() {
                 Run
             </button>
             
-            {queryResults && (
+            {queryResults.length > 0 && (
                 <div>
                     <h2>Query Results:</h2>
                     <div style={{ backgroundColor: 'white', padding: '1rem' }}>
